@@ -23,6 +23,7 @@ case class Settings(
   emailDelay: Duration,
   rootUrl: String,
   allowHttpSideEffects: Boolean,
+  httpPathAsEndpointName: Boolean,
   excludeHttpHeadersComparison: Boolean,
   skipEmailsWhenNoErrors: Boolean)
 

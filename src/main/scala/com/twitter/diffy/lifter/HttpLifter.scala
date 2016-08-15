@@ -22,7 +22,10 @@ object HttpLifter {
   }
 }
 
-class HttpLifter(excludeHttpHeadersComparison: Boolean) {
+class HttpLifter(
+  excludeHttpHeadersComparison: Boolean,
+  httpPathAsEndpointName: Boolean)
+{
   import HttpLifter._
 
   private[this] val log = Logger(classOf[HttpLifter])
@@ -41,8 +44,11 @@ class HttpLifter(excludeHttpHeadersComparison: Boolean) {
   }
 
   def liftRequest(req: HttpRequest): Future[Message] = {
-    val canonicalResource = Option(req.headers.get("Canonical-Resource"))
-    Future.value(Message(canonicalResource, FieldMap(Map("request"-> req.toString))))
+    Future.value(
+      Message(
+        endpoint = Option(
+          if (httpPathAsEndpointName) req.getUri else req.headers.get("Canonical-Resource")),
+        result = FieldMap(Map("request"-> req.toString))))
   }
 
   def liftResponse(resp: Try[HttpResponse]): Future[Message] = {

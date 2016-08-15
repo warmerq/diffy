@@ -64,6 +64,9 @@ object DiffyServiceModule extends TwitterModule {
   val allowHttpSideEffects =
     flag[Boolean]("allowHttpSideEffects", false, "Ignore POST, PUT, and DELETE requests if set to false")
 
+  val httpPathAsEndpointName =
+    flag[Boolean]("httpPathAsEndpointName", false, "Use http path as endpoint name instead of Canonical-Resource header")
+
   val excludeHttpHeadersComparison =
     flag[Boolean]("excludeHttpHeadersComparison", false, "Exclude comparison on HTTP headers if set to false")
 
@@ -92,6 +95,7 @@ object DiffyServiceModule extends TwitterModule {
       emailDelay(),
       rootUrl(),
       allowHttpSideEffects(),
+      httpPathAsEndpointName(),
       excludeHttpHeadersComparison(),
       skipEmailsWhenNoErrors()
     )
