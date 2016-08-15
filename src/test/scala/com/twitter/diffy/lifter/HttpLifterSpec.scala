@@ -61,13 +61,14 @@ class HttpLifterSpec extends ParentSpec {
       resp.setContent(ChannelBuffers.wrappedBuffer(body.getBytes(Charsets.Utf8)))
       resp
     }
+
   }
 
   describe("HttpLifter") {
     import Fixture._
     describe("LiftRequest") {
       it("lift simple Get request") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val req = request(HttpMethod.GET, reqUri)
         req.headers().add("Canonical-Resource", "endpoint")
 
@@ -76,6 +77,15 @@ class HttpLifterSpec extends ParentSpec {
 
         msg.endpoint.get should equal ("endpoint")
         resultFieldMap.get("request").get should equal (req.toString)
+      }
+
+      it("use http path as endpoint if flag httpPathAsEndpointName is on") {
+        val lifter = new HttpLifter(false, true)
+        val req = request(HttpMethod.GET, reqUri)
+        req.headers().add("Canonical-Resource", "endpoint")
+
+        val msg = Await.result(lifter.liftRequest(req))
+        msg.endpoint.get should equal (reqUri)
       }
     }
 
@@ -89,7 +99,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("exclude header in response map if excludeHttpHeadersComparison flag is off") {
-        val lifter = new HttpLifter(true)
+        val lifter = new HttpLifter(true, false)
         val resp = response(HttpResponseStatus.OK, validJsonBody)
 
         val msg = Await.result(lifter.liftResponse(Try(resp)))
@@ -99,7 +109,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("throw MalformedJsonContentException when json body is malformed") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val resp = response(HttpResponseStatus.OK, invalidJsonBody)
         val thrown = the [MalformedJsonContentException] thrownBy {
           Await.result(lifter.liftResponse(Try(resp)))
@@ -109,7 +119,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("only compare headers when ContentType header was not set") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val resp = response(HttpResponseStatus.OK, validJsonBody)
         resp.headers.remove(HttpHeaders.Names.CONTENT_TYPE)
 
@@ -120,7 +130,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("returns FieldMap when ContentType header is Html") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val resp = response(HttpResponseStatus.OK, validHtmlBody)
         resp.headers.set(HttpHeaders.Names.CONTENT_TYPE, MediaType.HTML_UTF_8.toString)
 
@@ -131,7 +141,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("throw ContentTypeNotSupportedException when ContentType header is not Json or Html") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val resp = response(HttpResponseStatus.OK, validJsonBody)
         resp.headers.remove(HttpHeaders.Names.CONTENT_TYPE)
           .add(HttpHeaders.Names.CONTENT_TYPE, textContentType)
@@ -144,7 +154,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("return None as controller endpoint when action header was not set") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val resp = response(HttpResponseStatus.OK, validJsonBody)
         resp.headers.remove(HttpLifter.ControllerEndpointHeaderName)
         val msg = Await.result(lifter.liftResponse(Try(resp)))
@@ -153,7 +163,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("propagate exception if response try failed") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val thrown = the [Exception] thrownBy {
           Await.result(lifter.liftResponse(Throw(testException)))
         }
@@ -162,7 +172,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       it("only compares header when Content-Length is zero") {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val resp = response(HttpResponseStatus.OK, "")
         resp.headers.set(HttpHeaders.Names.CONTENT_TYPE, MediaType.GIF.toString)
 
@@ -172,7 +182,7 @@ class HttpLifterSpec extends ParentSpec {
       }
 
       def checkJsonContentTypeIsLifted(contentType: String): Unit = {
-        val lifter = new HttpLifter(false)
+        val lifter = new HttpLifter(false, false)
         val resp = response(HttpResponseStatus.OK, validJsonBody)
         resp.headers.set(HttpHeaders.Names.CONTENT_TYPE, contentType)
 

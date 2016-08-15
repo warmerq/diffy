@@ -69,6 +69,9 @@ object DiffyServiceModule extends TwitterModule {
   val responseMode =
     flag[ResponseMode]("responseMode", EmptyResponse, "Respond with 'empty' response, or response from 'primary', 'secondary' or 'candidate'")
 
+  val httpPathAsEndpointName =
+    flag[Boolean]("httpPathAsEndpointName", false, "Use http path as endpoint name instead of Canonical-Resource header")
+
   val excludeHttpHeadersComparison =
     flag[Boolean]("excludeHttpHeadersComparison", false, "Exclude comparison on HTTP headers if set to false")
 
@@ -98,6 +101,7 @@ object DiffyServiceModule extends TwitterModule {
       rootUrl(),
       allowHttpSideEffects(),
       responseMode(),
+      httpPathAsEndpointName(),
       excludeHttpHeadersComparison(),
       skipEmailsWhenNoErrors()
     )

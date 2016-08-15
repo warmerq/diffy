@@ -25,6 +25,7 @@ case class Settings(
   rootUrl: String,
   allowHttpSideEffects: Boolean,
   responseMode: ResponseMode,
+  httpPathAsEndpointName: Boolean,
   excludeHttpHeadersComparison: Boolean,
   skipEmailsWhenNoErrors: Boolean)
 

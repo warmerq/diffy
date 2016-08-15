@@ -30,6 +30,7 @@ object TestHelper extends MockitoSugar {
     rootUrl = "test",
     allowHttpSideEffects = true,
     responseMode = EmptyResponse,
+    httpPathAsEndpointName = false,
     excludeHttpHeadersComparison = true,
     skipEmailsWhenNoErrors = false
   )
