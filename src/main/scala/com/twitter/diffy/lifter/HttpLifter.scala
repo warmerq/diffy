@@ -47,7 +47,7 @@ class HttpLifter(
     Future.value(
       Message(
         endpoint = Option(
-          if (httpPathAsEndpointName) req.getUri else req.headers.get("Canonical-Resource")),
+          if (httpPathAsEndpointName) req.getUri.replace('?', '_') else req.headers.get("Canonical-Resource")),
         result = FieldMap(Map("request"-> req.toString))))
   }
 
